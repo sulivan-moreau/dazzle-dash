@@ -4,13 +4,10 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-# Charger les données
 df = pd.read_csv('lifeExpectancyClean.csv')
 
-# Initialiser l'application avec un thème Bootstrap
-app = Dash(__name__, external_stylesheets=[dbc.themes.FLATLY])  # Vous pouvez changer le thème ici
+app = Dash(__name__, external_stylesheets=[dbc.themes.CERULEAN])
 
-# Layout de l'application
 app.layout = dbc.Container([
     dbc.Row(dbc.Col(html.H1("Dashboard - Espérance de Vie", className="text-center text-primary mt-4 mb-4"))),
     
@@ -20,7 +17,7 @@ app.layout = dbc.Container([
             dcc.Dropdown(
                 id='country-dropdown',
                 options=[{'label': country, 'value': country} for country in df['country'].unique()],
-                value='France'  # Pays par défaut
+                value='France'
             ),
         ], width=3),
         dbc.Col(dcc.Graph(id='life-expectancy-graph'), width=9),
@@ -43,7 +40,6 @@ app.layout = dbc.Container([
     )),
 ], fluid=True)
 
-# Callback pour mettre à jour le graphique d'espérance de vie en fonction du pays sélectionné
 @app.callback(
     Output('life-expectancy-graph', 'figure'),
     [Input('country-dropdown', 'value')]
@@ -54,7 +50,6 @@ def update_life_expectancy_graph(selected_country):
     fig.update_layout(xaxis_title="Année", yaxis_title="Espérance de vie")
     return fig
 
-# Callback pour afficher la corrélation entre l'alcool et l'espérance de vie
 @app.callback(
     Output('correlation-graph', 'figure'),
     [Input('country-dropdown', 'value')]
@@ -67,6 +62,5 @@ def update_correlation_graph(selected_country):
     fig.update_layout(xaxis_title="Consommation d'alcool", yaxis_title="Espérance de vie")
     return fig
 
-# Exécuter l'application
 if __name__ == '__main__':
     app.run_server(debug=True)
