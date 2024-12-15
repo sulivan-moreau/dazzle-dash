@@ -1,14 +1,14 @@
-from dash import Dash
-import index  # Importation de la navigation
-import callbacks  # Importation des interactions
+from dash import Dash, html
+import index  # Page principale
 
 # Initialisation de l'application Dash
 app = Dash(__name__, suppress_callback_exceptions=True)
-server = app.server  # Serveur pour déploiement
+server = app.server
 
-# Définition du layout de l'application avec navigation
-app.layout = index.layout  # Utilise le layout avec la navigation
+# Définition du layout principal
+app.layout = html.Div([
+    index.layout  # Utilise le layout principal importé
+])
 
-# Lancement du serveur
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run_server(debug=True)

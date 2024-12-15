@@ -1,28 +1,8 @@
-from dash import html, dcc, callback, Output, Input
-from layout import overview_layout, indicator_layout, comparison_layout  # Import des layouts
+from dash import html, dcc
+from layout import dashboard_layout  # Import unique pour la page principale
 
-# Layout principal avec navigation
+# Layout pour la navigation
 layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    html.Div([
-        dcc.Link('Vue d\'ensemble | ', href='/'),
-        dcc.Link('Analyse par indicateur | ', href='/indicators'),
-        dcc.Link('Comparaison par statut', href='/comparison'),
-    ], style={'padding': '20px', 'font-size': '18px'}),
-    html.Div(id='page-content')  # Contenu dynamique des pages
+    html.Div(id='page-content'),
+    dashboard_layout  # Affiche directement le dashboard interactif
 ])
-
-# Callback pour la navigation entre les pages
-@callback(
-    Output('page-content', 'children'),
-    Input('url', 'pathname')
-)
-def display_page(pathname):
-    if pathname == '/':
-        return overview_layout
-    elif pathname == '/indicators':
-        return indicator_layout
-    elif pathname == '/comparison':
-        return comparison_layout
-    else:
-        return html.H1("404: Page non trouvée")
