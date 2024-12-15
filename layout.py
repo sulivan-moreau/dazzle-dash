@@ -5,21 +5,18 @@ import plotly.express as px
 df = pd.read_csv("lifeExpectancyClean.csv")
 
 # Layout Vue d'ensemble
-
-
-
 overview_layout = html.Div([
     html.H1("Vue d'ensemble des indicateurs clés"),
     dcc.Graph(
         figure=px.imshow(
-            df[['life_expectancy', 'adult_mortality', 'hiv/aids', 'gdp']].corr(), 
-            color_continuous_scale='viridis',  # Utilise 'viridis' ou une autre palette valide
+            df[['life_expectancy', 'adult_mortality', 'hiv/aids', 'gdp']].corr(),
+            color_continuous_scale='viridis',
             title="Matrice de corrélation des indicateurs clés"
         )
     )
 ])
 
-
+# Layout Analyse par indicateur
 indicator_layout = html.Div([
     html.H1("Analyse par indicateur spécifique"),
     dcc.Dropdown(
@@ -34,21 +31,12 @@ indicator_layout = html.Div([
     dcc.Graph(id='indicator-graph')  # Graphique interactif
 ])
 
-import pandas as pd
-from dash import html, dcc
-import plotly.express as px
-
-df = pd.read_csv("lifeExpectancyClean.csv")
-
-# Sélection des colonnes numériques et groupement par status
-df_numeric = df.select_dtypes(include='number')
-df_grouped = df_numeric.join(df['status']).groupby('status').mean().reset_index()
-
+# Layout Comparaison par statut
 comparison_layout = html.Div([
     html.H1("Comparaison des indicateurs par statut des pays"),
     dcc.Graph(
         figure=px.bar(
-            df_grouped,
+            df.groupby('status').mean(numeric_only=True).reset_index(),
             x='status',
             y=['life_expectancy', 'gdp', 'schooling'],
             barmode='group',
@@ -56,5 +44,3 @@ comparison_layout = html.Div([
         )
     )
 ])
-
-

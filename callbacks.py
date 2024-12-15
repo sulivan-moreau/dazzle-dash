@@ -1,11 +1,11 @@
-from dash.dependencies import Input, Output
+from dash import Input, Output
 from app import app
 import pandas as pd
 import plotly.express as px
 
 df = pd.read_csv("lifeExpectancyClean.csv")
 
-# Callback pour mettre à jour le graphique selon l'indicateur sélectionné
+# Callback pour mettre à jour le graphique en fonction de l'indicateur sélectionné
 @app.callback(
     Output('indicator-graph', 'figure'),
     Input('indicator-dropdown', 'value')
