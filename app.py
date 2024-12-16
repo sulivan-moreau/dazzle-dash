@@ -1,14 +1,21 @@
-from dash import Dash, html
-import index  # Page principale
+import dash
+from dash import Input, Output
+import pandas as pd
+from layout import create_layout
+from callbacks import register_callbacks
 
 # Initialisation de l'application Dash
-app = Dash(__name__, suppress_callback_exceptions=True)
-server = app.server
+app = dash.Dash(__name__)
 
-# Définition du layout principal
-app.layout = html.Div([
-    index.layout  # Utilise le layout principal importé
-])
+# Chargement des données
+df = pd.read_csv("lifeExpectancyClean.csv")
 
+# Définir le layout
+app.layout = create_layout(df)
+
+# Enregistrement des callbacks
+register_callbacks(app, df)
+
+# Lancer l'application
 if __name__ == "__main__":
     app.run_server(debug=True)

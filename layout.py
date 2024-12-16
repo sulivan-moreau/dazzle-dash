@@ -1,80 +1,63 @@
-import pandas as pd
-from dash import html, dcc
-import plotly.express as px
+from dash import dcc, html
 
-# Chargement des données
-df = pd.read_csv("lifeExpectancyClean.csv")
+def create_layout(df):
+    # Options pour les filtres
+    available_years = sorted(df['year'].unique())
+    available_countries = sorted(df['country'].unique())
 
-# Nettoyage des données (gdp et autres colonnes numériques)
-df['gdp'] = pd.to_numeric(df['gdp'], errors='coerce').fillna(0)
+    # Layout de l'application
+    return html.Div([
+        html.H1("Tableau de bord sur l'espérance de vie", style={"textAlign": "center", "color": "darkblue"}),
 
-# Statistiques principales
-total_countries = df['country'].nunique()
-average_life_expectancy = df['life_expectancy'].mean().round(2)
-average_population = (df['population'].mean() / 1_000_000).round(2)
-average_gdp = (df['gdp'].mean() / 1_000).round(2)
-total_expenditure = df['total_expenditure'].sum().round(2)
+        # Filtres interactifs
+        html.Div([
+            html.Div([
+                html.Label("Année(s) :", style={"fontWeight": "bold", "fontSize": "16px"}),
+                dcc.Dropdown(
+                    id="year-dropdown",
+                    options=[{"label": "Toutes les Années", "value": "all"}] +
+                            [{"label": str(year), "value": year} for year in available_years],
+                    value=["all"], multi=True
+                )
+            ], style={"width": "48%"}),
 
-# Graphiques
-fig_life_expectancy_year = px.line(
-    df.groupby("year")['life_expectancy'].mean().reset_index(),
-    x="year", y="life_expectancy",
-    title="Average Life Expectancy by Year", markers=True
-)
+            html.Div([
+                html.Label("Pays :", style={"fontWeight": "bold", "fontSize": "16px"}),
+                dcc.Dropdown(
+                    id="country-dropdown",
+                    options=[{"label": "Tous les Pays", "value": "all"}] +
+                            [{"label": country, "value": country} for country in available_countries],
+                    value=["all"], multi=True
+                )
+            ], style={"width": "48%"})
+        ], style={"display": "flex", "justifyContent": "space-between", "margin": "20px"}),
 
-status_count = df['status'].value_counts().reset_index()
-status_count.columns = ['status', 'count']
-fig_status = px.pie(
-    status_count, names="status", values="count",
-    title="Hepatitis B by Status", hole=0.4
-)
+        # Indicateurs principaux (KPI)
+        html.Div([
+            html.Div(id="kpi-life-expectancy", style={"width": "24%", "textAlign": "center"}),
+            html.Div(id="kpi-gdp", style={"width": "24%", "textAlign": "center"}),
+            html.Div(id="kpi-schooling", style={"width": "24%", "textAlign": "center"}),
+            html.Div(id="kpi-population", style={"width": "24%", "textAlign": "center"})
+        ], style={"display": "flex", "justifyContent": "space-around", "margin": "20px"}),
 
-fig_top_gdp = px.bar(
-    df.groupby('country')['gdp'].sum().nlargest(10).reset_index(),
-    x="gdp", y="country", orientation="h",
-    title="Top 10 Countries by GDP", text="gdp"
-)
+        # Graphiques interactifs
+        html.Div([
+            dcc.Graph(id="line-graph", style={"width": "48%", "display": "inline-block"}),
+            dcc.Graph(id="scatter-graph", style={"width": "48%", "display": "inline-block"})
+        ]),
 
-fig_population = px.bar(
-    df.groupby('country')['population'].sum().nlargest(10).reset_index(),
-    x="population", y="country", orientation="h",
-    title="Country Analysis Based on Population", text="population"
-)
+        html.Div([
+            dcc.Graph(id="bar-graph", style={"width": "48%", "display": "inline-block"}),
+            dcc.Graph(id="bar-adult-mortality", style={"width": "48%", "display": "inline-block"})
+        ]),
 
-top_life_expectancy = df.groupby("country")['life_expectancy'].mean().nlargest(10)
+        html.Div([
+            dcc.Graph(id="choropleth-graph", style={"width": "48%", "display": "inline-block"}),
+            dcc.Graph(id="bar-life-expectancy-status", style={"width": "48%", "display": "inline-block"})
+        ]),
 
-# Layout complet du dashboard
-dashboard_layout = html.Div([
-    html.H1("LIFE EXPECTANCY ANALYSIS", style={"textAlign": "center", "color": "darkred"}),
-
-    # Statistiques principales
-    html.Div([
-        html.Div(f"TOTAL COUNTRIES: {total_countries}", className="stat-box"),
-        html.Div(f"AVERAGE LIFE EXPECTANCY: {average_life_expectancy}", className="stat-box"),
-        html.Div(f"AVERAGE POPULATION: {average_population}M", className="stat-box"),
-        html.Div(f"AVERAGE GDP: {average_gdp}K", className="stat-box"),
-        html.Div(f"TOTAL EXPENDITURE: {total_expenditure}K", className="stat-box"),
-    ], style={"display": "flex", "justifyContent": "space-around", "margin": "20px"}),
-
-    # Graphiques principaux
-    html.Div([
-        dcc.Graph(figure=fig_life_expectancy_year, style={"width": "48%", "display": "inline-block"}),
-        dcc.Graph(figure=fig_status, style={"width": "48%", "display": "inline-block"}),
-    ]),
-
-    html.Div([
-        dcc.Graph(figure=fig_top_gdp, style={"width": "48%", "display": "inline-block"}),
-        dcc.Graph(figure=fig_population, style={"width": "48%", "display": "inline-block"}),
-    ]),
-
-    # Tableau des pays avec la meilleure espérance de vie
-    html.Div([
-        html.H3("LIFE EXPECTANCY BY POPULATION", style={"textAlign": "center", "marginBottom": "20px"}),
-        html.Table([
-            html.Tr([html.Th("Country"), html.Th("Average Life Expectancy")])
-        ] + [
-            html.Tr([html.Td(country), html.Td(round(value, 1))])
-            for country, value in top_life_expectancy.items()
-        ], style={"margin": "auto", "textAlign": "center", "width": "50%"})
+        html.Div([
+            dcc.Graph(id="bar-hiv", style={"width": "48%", "display": "inline-block"}),
+            dcc.Graph(id="bar-bmi", style={"width": "48%", "display": "inline-block"})
+        ])
     ])
-], style={"margin": "20px"})
