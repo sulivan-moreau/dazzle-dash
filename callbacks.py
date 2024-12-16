@@ -51,7 +51,7 @@ def register_callbacks(app, df):
         schooling_data = filtered_df.groupby(["country", "status"], as_index=False)["schooling"].mean()
         schooling_data = schooling_data.sort_values(by=["status", "schooling"], ascending=[True, False])
         bar_fig = px.bar(schooling_data, x="schooling", y="country", color="status",
-                         title="Taux de scolarisation moyen", orientation="h",
+                         title="Taux de scolarisation moyen", orientation="h")
                         #  color_discrete_map={"Developpé": "red", "En developpement": "blue"})
 
         # Graphique pour Adult Mortality
